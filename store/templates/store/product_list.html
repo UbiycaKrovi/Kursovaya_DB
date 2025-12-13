@@ -1,0 +1,35 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <h5>Категории</h5>
+        <ul class="list-group">
+            {% for category in categories %}
+            <li class="list-group-item">{{ category.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-9">
+        <h2>Каталог товаров</h2>
+        {% if products %}
+            <div class="row">
+                {% for product in products %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description|truncatewords:10 }}</p>
+                            <p class="card-text"><strong>{{ product.price }} ₽</strong></p>
+                            <a href="{% url 'product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="alert alert-info">Товары отсутствуют.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ product.name }}</h1>
+            <p class="lead">{{ product.description }}</p>
+            <p><strong>Цена: {{ product.price }} ₽</strong></p>
+            <p>Категория: {{ product.category.name }}</p>
+            <p>Поставщик: {{ product.supplier.company_name }}</p>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">← Назад к каталогу</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

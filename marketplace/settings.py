@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -77,10 +76,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'store',
-        'USER': 'admin',
-        'PASSWORD': 'kursach',
+        'USER': 'postgres',
+        'PASSWORD': 'quasexort13',
         'HOST': 'localhost',
         'PORT': '5432',
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        }
     }
 }
 

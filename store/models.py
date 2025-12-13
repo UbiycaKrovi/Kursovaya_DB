@@ -3,19 +3,35 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone 
 
 class User(AbstractUser):
-    ROLE_CHOICES = [
+    ROLE_CHOICES = (
         ('admin', 'Администратор'),
         ('manager', 'Менеджер'),
         ('customer', 'Покупатель'),
-    ]
-    email = models.EmailField(unique=True)
+    )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='customer')
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=20)
     address = models.CharField(max_length=255, blank=True)
-    registration_date = models.DateTimeField(default=timezone.now)
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'phone']
+
+    email = models.EmailField(
+    'email address', 
+    unique=True,
+    error_messages={'unique': "A user with that email already exists."},
+    )
     
     def __str__(self):
-        return self.name
+        return f"{self.username} ({self.get_role_display()})"
+    
+    def is_admin(self):
+        return self.role == 'admin'
+    
+    def is_manager(self):
+        return self.role == 'manager'
+    
+    def is_customer(self):
+        return self.role == 'customer'
 
 class Category(models.Model):
     name = models.CharField(max_length=100)

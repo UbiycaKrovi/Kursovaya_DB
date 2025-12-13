@@ -1,14 +1,17 @@
 from django.contrib import admin
-from .models import User, Category, Supplier, Warehouse, Product, Cart, CartItem, Order, Payment, Delivery, Review
+from django.contrib.auth.admin import UserAdmin
+from .models import *
 
-admin.site.register(User)
-admin.site.register(Category)
-admin.site.register(Supplier)
-admin.site.register(Warehouse)
-admin.site.register(Product)
-admin.site.register(Cart)
-admin.site.register(CartItem)
-admin.site.register(Order)
-admin.site.register(Payment)
-admin.site.register(Delivery)
-admin.site.register(Review)
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'role', 'phone', 'is_staff')
+    list_filter = ('role', 'is_staff', 'is_active')
+    fieldsets = UserAdmin.fieldsets + (
+        ('Дополнительно', {'fields': ('role', 'phone', 'address')}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Дополнительно', {'fields': ('role', 'phone', 'address')}),
+    )
+
+admin.site.register([Category, Supplier, Warehouse, Product, Cart, CartItem, 
+                    Order, Payment, Delivery, Review])
