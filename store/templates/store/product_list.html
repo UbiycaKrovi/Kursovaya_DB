@@ -1,35 +1,107 @@
 {% extends 'store/base.html' %}
+{% block title %}Каталог товаров{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-3">
-        <h5>Категории</h5>
-        <ul class="list-group">
-            {% for category in categories %}
-            <li class="list-group-item">{{ category.name }}</li>
-            {% endfor %}
-        </ul>
+<div class="container mt-5">
+    <!-- Заголовок и фильтр по категориям -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="mb-3"><i class="fas fa-store me-2"></i>Каталог товаров</h1>
+            {% if selected_category_name %}
+                <p class="text-muted">Выбрана категория: <strong>{{ selected_category_name }}</strong></p>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <form method="get" class="d-flex gap-2 justify-content-end">
+                <select class="form-select" name="category" onchange="this.form.submit()">
+                    <option value="">Все категории</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:'s' %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if selected_category %}
+                    <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">Показать все</a>
+                {% endif %}
+            </form>
+        </div>
     </div>
-    <div class="col-md-9">
-        <h2>Каталог товаров</h2>
-        {% if products %}
-            <div class="row">
-                {% for product in products %}
-                <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text">{{ product.description|truncatewords:10 }}</p>
-                            <p class="card-text"><strong>{{ product.price }} ₽</strong></p>
-                            <a href="{% url 'product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
+
+    <!-- Кнопки экспорта -->
+    <div class="mb-3 d-flex gap-2">
+        {% if user.is_authenticated and user.is_admin %}
+            <a href="{% url 'export_products_json' %}?category={{ selected_category }}" 
+               class="btn btn-outline-secondary btn-sm">
+                Экспорт JSON
+            </a>
+            <a href="{% url 'export_products_csv' %}?category={{ selected_category }}" 
+               class="btn btn-outline-secondary btn-sm">
+                Экспорт CSV
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Список товаров -->
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 hover-shadow">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                    <p class="text-muted mb-1">
+                        Категория: 
+                        {% if product.category %}
+                            {{ product.category.name }}
+                        {% else %}
+                            не указана
+                        {% endif %}
+                    </p>
+                    <p class="text-muted mb-3">
+                        {% if product.quantity %}
+                            Остаток: {{ product.quantity }} шт
+                        {% else %}
+                            Нет в наличии
+                        {% endif %}
+                    </p>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-success fw-bold fs-4">{{ product.price }} ₽</div>
+                            </div>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'add_to_cart' product.pk %}" 
+                                   class="btn btn-primary btn-lg">
+                                    <i class="fas fa-cart-plus"></i>
+                                </a>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                                    Войти для покупки
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                {% endfor %}
+                <div class="card-footer bg-white border-0 pt-0">
+                    <a href="{% url 'product_detail' product.pk %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-eye me-1"></i>Подробнее
+                    </a>
+                </div>
             </div>
-        {% else %}
-            <p class="alert alert-info">Товары отсутствуют.</p>
-        {% endif %}
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
+            <h4>Товары не найдены</h4>
+            <p class="text-muted">Попробуйте выбрать другую категорию или добавьте товары через админку.</p>
+            {% if user.is_authenticated and user.is_admin or user.is_supplier %}
+                <a href="{% url 'product_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Добавить товар
+                </a>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

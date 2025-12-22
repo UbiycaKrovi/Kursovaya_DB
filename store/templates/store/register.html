@@ -1,0 +1,51 @@
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <h3 class="text-center mb-4">Регистрация</h3>
+                <form method="post" id="regForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <h6>Зарегистрироваться как:</h6>
+                        {{ form.user_type }}
+                    </div>
+                    
+                    <div id="customer-fields" style="display: none;">
+                        <div class="mb-3">{{ form.username }}</div>
+                        <div class="mb-3">{{ form.phone_customer }}</div>
+                        <div class="mb-3">{{ form.address }}</div>
+                    </div>
+                    
+                    <div id="supplier-fields" style="display: none;">
+                        <div class="mb-3">{{ form.company_name }}</div>
+                        <div class="mb-3">{{ form.inn }}</div>
+                        <div class="mb-3">{{ form.phone_supplier }}</div>
+                    </div>
+                    
+                    <div class="mb-3">{{ form.email }}</div>
+                    <div class="mb-3">{{ form.password1.label_tag }} {{ form.password1 }}</div>
+                    <div class="mb-3">{{ form.password2.label_tag }} {{ form.password2 }}</div>
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                </form>
+                <p class="text-center mt-3">
+                    Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFields(userType) {
+    document.getElementById('customer-fields').style.display = userType === 'customer' ? 'block' : 'none';
+    document.getElementById('supplier-fields').style.display = userType === 'supplier' ? 'block' : 'none';
+}
+</script>

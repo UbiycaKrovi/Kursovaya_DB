@@ -5,7 +5,7 @@ from django.utils import timezone
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('admin', 'Администратор'),
-        ('manager', 'Менеджер'),
+        ('supplier', 'Поставщик'),
         ('customer', 'Покупатель'),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='customer')
@@ -27,8 +27,8 @@ class User(AbstractUser):
     def is_admin(self):
         return self.role == 'admin'
     
-    def is_manager(self):
-        return self.role == 'manager'
+    def is_supplier(self):
+        return self.role == 'supplier'
     
     def is_customer(self):
         return self.role == 'customer'
@@ -42,14 +42,18 @@ class Category(models.Model):
         return self.name
 
 class Supplier(models.Model):
-    company_name = models.CharField(max_length=100)
+    company_name = models.CharField(max_length=100, unique=True)
     inn = models.CharField(max_length=12)
     phone = models.CharField(max_length=20)
     email = models.EmailField(blank=True)
     address = models.CharField(max_length=255, blank=True)
-
+    
     def __str__(self):
-        return self.name
+        return self.company_name
+        
+    class Meta:
+        verbose_name = 'Поставщик'
+        verbose_name_plural = 'Поставщики'
 
 class Warehouse(models.Model):
     name = models.CharField(max_length=100)
@@ -90,20 +94,20 @@ class Review(models.Model):
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     def get_total_price(self):
         return sum([item.product.price * item.quantity for item in self.items.all()])
     
     def __str__(self):
-        return self.name
+        return f"Корзина {self.user.username}"
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-
+    
     def __str__(self):
-        return self.name
+        return f"{self.product.name} (x{self.quantity})"
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
