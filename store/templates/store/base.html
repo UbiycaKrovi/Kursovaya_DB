@@ -50,21 +50,25 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user-circle me-1"></i>{{ user.username }}
-                            <span class="badge bg-{% if user.is_admin %}danger{% elif user.is_supplier %}warning{% else %}success{% endif %} ms-1">
+                            <span class="badge bg-{% if user.is_admin %}danger{% elif user.is_manager %}warning{% else %}success{% endif %} ms-1">
                                 {{ user.get_role_display }}
                             </span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/admin/">Админ-панель</a></li>
 
-                            {% if user.is_admin or user.is_supplier %}
+                            {# Добавить товар: АДМИН + МЕНЕДЖЕР + ПОСТАВЩИК #}
+                            {% if user.is_admin or user.is_manager or not user.is_customer %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item" href="{% url 'product_create' %}">
                                         <i class="fas fa-plus-circle me-1"></i>Добавить товар
                                     </a>
                                 </li>
+                            {% endif %}
 
+                            {# Экспорт: ТОЛЬКО админ #}
+                            {% if user.is_admin %}
                                 <li><hr class="dropdown-divider"></li>
                                 <!-- Экспорт товаров -->
                                 <li><a class="dropdown-item" href="{% url 'export_products_csv' %}">

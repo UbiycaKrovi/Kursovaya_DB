@@ -12,6 +12,20 @@ urlpatterns = [
     path('remove-from-cart/<int:pk>/', views.remove_from_cart, name='remove_from_cart'),
     path('update-cart/<int:pk>/', views.update_cart_item, name='update_cart_item'),
     path('product/create/', views.ProductCreateView.as_view(), name='product_create'),
+    
+    # Корзина
+    path('cart/', views.cart_view, name='cart'),
+    path('cart/add/<int:pk>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/remove/<int:pk>/', views.remove_from_cart, name='remove_from_cart'),
+    path('cart/update/<int:pk>/', views.update_cart_item, name='update_cart_item'),
+
+    # Заказы
+    path('cart/checkout/', views.checkout, name='checkout'),
+    path('orders/', views.order_list, name='order_list'),
+    path('orders/<int:pk>/', views.order_detail, name='order_detail'),
+
+    # Товары поставщика
+    path('supplier/<int:pk>/', views.supplier_products, name='supplier_products'),
 
     # Экспорт
     path('export/products/json/', views.export_products_json, name='export_products_json'),

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import User, Supplier, Product
+from .models import User, Supplier, Product, Review
 
 User = get_user_model()
 
@@ -148,3 +148,18 @@ class ProductForm(forms.ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'form-control form-control-lg',
             })
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'text']
+        labels = {
+            'rating': 'Оценка (1–5)',
+            'text': 'Текст отзыва',
+        }
+
+    def clean_rating(self):
+        r = self.cleaned_data['rating']
+        if r < 1 or r > 5:
+            raise forms.ValidationError('Оценка должна быть от 1 до 5.')
+        return r

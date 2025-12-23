@@ -89,7 +89,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return f"Отзыв {self.user.username} на {self.product.name}"
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -121,7 +121,7 @@ class Order(models.Model):
         self.save()
 
     def __str__(self):
-        return self.name
+        return f"Заказ {self.user.username} - {self.total_price}₽"
 
 class Payment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
@@ -131,7 +131,7 @@ class Payment(models.Model):
     transaction_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return f"Оплата заказа {self.order.id}"
 
 class Delivery(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
@@ -142,4 +142,4 @@ class Delivery(models.Model):
     delivery_status = models.CharField(max_length=20)
 
     def __str__(self):
-        return self.name
+        return f"Доставка заказа {self.order.id}"

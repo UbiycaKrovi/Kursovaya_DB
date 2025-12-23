@@ -1,0 +1,12 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Оформление заказа</h2>
+  <p>Сумма к оплате: <strong>{{ total_price }} ₽</strong></p>
+  <p>В рамках курсовой оплата проводится в тестовом режиме, без реального списания средств.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Подтвердить и оплатить</button>
+  </form>
+</div>
+{% endblock %}

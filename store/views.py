@@ -3,10 +3,12 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-from .models import Product, Category, Supplier, Cart, CartItem, Order, Payment, Delivery
-from .forms import UserRegistrationForm, ProductForm 
+from .models import Product, Category, Supplier, Cart, CartItem, Order, Payment, Delivery, Review
+from .forms import UserRegistrationForm, ProductForm, ReviewForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import CreateView
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 import csv
 import json
 from django.http import JsonResponse, HttpResponse
@@ -14,28 +16,59 @@ from django.http import JsonResponse, HttpResponse
 def product_list(request):
     products = Product.objects.all()
     categories = Category.objects.all()
-    
+
     category_id = request.GET.get('category')
+    supplier_id = request.GET.get('supplier')
+
     selected_category_name = None
-    
+    selected_supplier = None
+
     if category_id:
         products = products.filter(category_id=category_id)
         try:
             selected_category_name = Category.objects.get(id=category_id).name
         except Category.DoesNotExist:
-            pass
-    
+            selected_category_name = None
+
+    if supplier_id:
+        products = products.filter(supplier_id=supplier_id)
+        try:
+            selected_supplier = Supplier.objects.get(id=supplier_id)
+        except Supplier.DoesNotExist:
+            selected_supplier = None
+
     return render(request, 'store/product_list.html', {
-        'products': products, 
+        'products': products,
         'categories': categories,
         'selected_category': category_id,
-        'selected_category_name': selected_category_name 
+        'selected_category_name': selected_category_name,
+        'selected_supplier': selected_supplier,
     })
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
+    reviews = Review.objects.filter(product=product).select_related('user').order_by('-created_at')
+    avg_rating = product.get_average_rating()
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('login')
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            messages.success(request, 'Отзыв добавлен!')
+            return redirect('product_detail', pk=product.pk)
+    else:
+        form = ReviewForm()
+
     return render(request, 'store/product_detail.html', {
-        'product': product
+        'product': product,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
+        'form': form,
     })
 
 def register(request):
@@ -69,14 +102,14 @@ class ProductCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = ProductForm
     template_name = 'store/product_create.html'
     success_url = '/'
-    
+
     def test_func(self):
         return self.request.user.is_admin or self.request.user.is_supplier
-    
+
     def form_valid(self, form):
-        form.instance.supplier = Supplier.objects.first()
+        form.instance.user = self.request.user
         return super().form_valid(form)
-    
+
 @login_required
 def cart_view(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
@@ -268,3 +301,68 @@ def export_suppliers_csv(request):
             s.address,
         ])
     return response
+
+@login_required
+def checkout(request):
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    if not cart.items.exists():
+        messages.error(request, 'Корзина пуста.')
+        return redirect('cart')
+
+    if request.method == 'POST':
+        total_price = cart.get_total_price()
+
+        order = Order.objects.create(
+            user=request.user,
+            cart=cart,
+            status='оплачен',
+            total_price=total_price,
+        )
+
+        Payment.objects.create(
+            order=order,
+            method='Онлайн-оплата (тест)',
+            amount=total_price,
+            status='успешно',
+        )
+
+        Delivery.objects.create(
+            order=order,
+            tracking_number=f'TEST-{order.id}',
+            delivery_address=request.user.address or 'Не указан',
+            delivery_status='в обработке',
+        )
+
+        messages.success(request, f'Заказ #{order.id} оформлен и оплачен.')
+        return redirect('order_detail', pk=order.pk)
+
+    total_price = cart.get_total_price()
+    return render(request, 'store/checkout.html', {
+        'cart': cart,
+        'total_price': total_price,
+    })
+
+
+@login_required
+def order_list(request):
+    orders = Order.objects.filter(user=request.user).select_related('payment', 'delivery')
+    return render(request, 'store/order_list.html', {'orders': orders})
+
+
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(
+        Order.objects.select_related('payment', 'delivery', 'cart'),
+        pk=pk,
+        user=request.user,
+    )
+    return render(request, 'store/order_detail.html', {'order': order})
+
+@login_required
+def supplier_products(request, pk):
+    supplier = get_object_or_404(Supplier, pk=pk)
+    products = Product.objects.filter(supplier=supplier)
+    return render(request, 'store/supplier_products.html', {
+        'supplier': supplier,
+        'products': products,
+    })

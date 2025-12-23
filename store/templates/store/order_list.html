@@ -1,0 +1,24 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Мои заказы</h2>
+  {% if orders %}
+    <table class="table">
+      <tr>
+        <th>ID</th><th>Сумма</th><th>Статус</th><th>Оплата</th><th>Доставка</th>
+      </tr>
+      {% for o in orders %}
+        <tr>
+          <td><a href="{% url 'order_detail' o.id %}">#{{ o.id }}</a></td>
+          <td>{{ o.total_price }} ₽</td>
+          <td>{{ o.status }}</td>
+          <td>{{ o.payment.status }}</td>
+          <td>{{ o.delivery.delivery_status }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>У вас пока нет заказов.</p>
+  {% endif %}
+</div>
+{% endblock %}
