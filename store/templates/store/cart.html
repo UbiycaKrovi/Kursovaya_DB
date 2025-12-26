@@ -22,7 +22,9 @@
                     <tr>
                         <td>
                             <strong>{{ item.product.name }}</strong><br>
-                            <small class="text-muted">{{ item.product.description|truncatewords:10 }}</small>
+                            <small class="text-muted">
+                                {{ item.product.description|truncatewords:10 }}
+                            </small>
                         </td>
                         <td>{{ item.product.price }} ₽</td>
                         <td>
@@ -35,8 +37,8 @@
                         </td>
                         <td>
                             <strong>
-                                {{ item.product.price|floatformat:0 }} × {{ item.quantity }} =
-                                {{ item.product.price|floatformat:0|add:"0"|floatformat:0 }} ₽
+                                {{ item.product.price }} × {{ item.quantity }} =
+                                {{ item.product.price|floatformat:0|add:"0" }} ₽
                             </strong>
                         </td>
                         <td>

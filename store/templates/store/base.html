@@ -42,6 +42,11 @@
                         <i class="fas fa-shopping-cart me-1"></i>Корзина
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'order_list' %}">
+                        <i class="fas fa-box me-1"></i>Мои заказы
+                    </a>
+                </li>
                 {% endif %}
             </ul>
 
@@ -57,7 +62,6 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/admin/">Админ-панель</a></li>
 
-                            {# Добавить товар: АДМИН + МЕНЕДЖЕР + ПОСТАВЩИК #}
                             {% if user.is_admin or user.is_manager or not user.is_customer %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -67,7 +71,6 @@
                                 </li>
                             {% endif %}
 
-                            {# Экспорт: ТОЛЬКО админ #}
                             {% if user.is_admin %}
                                 <li><hr class="dropdown-divider"></li>
                                 <!-- Экспорт товаров -->

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import Group
 from .models import (
     User, Category, Supplier, Warehouse, Product, Review, 
     Cart, CartItem, Order, Payment, Delivery
@@ -73,3 +74,4 @@ admin.site.register(Review)
 admin.site.register(Order)
 admin.site.register(Payment)
 admin.site.register(Delivery)
+admin.site.unregister(Group)

@@ -38,7 +38,6 @@ def upload_to_remote(path):
         y.mkdir(YANDEX_DIR)
 
     remote_path = f"{YANDEX_DIR}/{path.name}"
-    # загружаем файл
     with open(path, "rb") as f:
         y.upload(f, remote_path, overwrite=True)
 

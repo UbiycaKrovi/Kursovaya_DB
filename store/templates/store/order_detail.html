@@ -1,17 +1,52 @@
 {% extends 'store/base.html' %}
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2>Заказ #{{ order.id }}</h2>
-  <p><strong>Сумма:</strong> {{ order.total_price }} ₽</p>
-  <p><strong>Статус заказа:</strong> {{ order.status }}</p>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
 
-  <h4>Оплата</h4>
-  <p><strong>Способ:</strong> {{ order.payment.method }}</p>
-  <p><strong>Статус оплаты:</strong> {{ order.payment.status }}</p>
+    <h2>Заказ #{{ order.id }}</h2>
+    <p><strong>Сумма:</strong> {{ order.total_price }} ₽</p>
 
-  <h4>Доставка</h4>
-  <p><strong>Трек-номер:</strong> {{ order.delivery.tracking_number }}</p>
-  <p><strong>Адрес:</strong> {{ order.delivery.delivery_address }}</p>
-  <p><strong>Статус доставки:</strong> {{ order.delivery.delivery_status }}</p>
+    <p>
+        <strong>Статус заказа:</strong>
+        <span id="order-status-text">{{ order.status }}</span>
+    </p>
+
+    <h4>Оплата</h4>
+    <p><strong>Способ:</strong> {{ order.payment.method }}</p>
+    <p><strong>Статус оплаты:</strong> {{ order.payment.status }}</p>
+
+    <h4>Доставка</h4>
+    <p><strong>Трек-номер:</strong> {{ order.delivery.tracking_number }}</p>
+    <p><strong>Адрес:</strong> {{ order.delivery.delivery_address }}</p>
+    <p>
+        <strong>Статус доставки:</strong>
+        <span id="delivery-status-text">{{ order.delivery.delivery_status }}</span>
+    </p>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const orderStatusEl = document.getElementById('order-status-text');
+    const deliveryStatusEl = document.getElementById('delivery-status-text');
+    if (!orderStatusEl || !deliveryStatusEl) return;
+
+    if (deliveryStatusEl.textContent.trim() !== 'в обработке') return;
+
+    setTimeout(function () {
+        orderStatusEl.textContent = 'в пути';
+        deliveryStatusEl.textContent = 'в пути';
+
+        setTimeout(function () {
+            orderStatusEl.textContent = 'в пункте выдачи';
+            deliveryStatusEl.textContent = 'в пункте выдачи, можно забрать';
+        }, 5000);
+    }, 5000);
+});
+</script>
 {% endblock %}
